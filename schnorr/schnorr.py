@@ -1,4 +1,4 @@
-#ZKP with Schnorr
+#ZKP with 精進版Schnorr
 #Author: 林伯叡、黃杬霆
 #Date: 2025/05/08
 
@@ -7,14 +7,15 @@ import random
 import os
 import hashlib
 import time
+import secrets
 
 # ===== 改進挑戰值：使用 (承諾值f + 時間 + 回合編號) 雜湊產生 c =====
 def get_challenge(f, round_id, timestamp, q):
     """
-    模擬 Verifier 使用 (承諾值f + 時間 + 回合編號) 雜湊產生挑戰值 c
-    timestamp 為外部傳入，避免時間不一致問題
+    在內部自動產生 salt，並用 f, round_id, timestamp, salt 雜湊產生挑戰值 c。
     """
-    input_str = f"{f}|{round_id}|{timestamp}"
+    salt = secrets.token_hex(16)  # 產生 16 bytes (32 hex 字元) 的隨機 salt
+    input_str = f"{f}|{round_id}|{timestamp}|{salt}"
     h = hashlib.sha256(input_str.encode()).hexdigest()
     return (int(h, 16) % (q - 1)) + 1
 
